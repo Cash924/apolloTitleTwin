@@ -66,11 +66,6 @@
       margin-top: 2px;
     }
 
-    #posModeRow {
-      margin-top: 10px;
-      font-size: 14px;
-    }
-
     #clickBoxWrapper {
       margin-top: 8px;
     }
@@ -167,32 +162,20 @@
     </div>
   </div>
 
-  <!-- Position mode -->
-  <div id="posModeRow">
-    <strong>Position mode</strong><br>
-    <label>
-      <input type="radio" name="posMode" value="preset" checked>
-      Simple (top / center / bottom)
-    </label>
-    <label>
-      <input type="radio" name="posMode" value="custom">
-      Custom (click in webcam box)
-    </label>
-  </div>
-
-  <!-- Preset position -->
-  <div id="presetRow">
-    <label for="position">Preset position</label>
-    <select id="position">
-      <option value="bottom">Bottom</option>
-      <option value="center">Center</option>
-      <option value="top">Top</option>
-    </select>
-  </div>
+  <!-- Position dropdown -->
+  <label for="position">Position</label>
+  <select id="position">
+    <option value="bottom">Bottom (center)</option>
+    <option value="center">Center</option>
+    <option value="top">Top (center)</option>
+    <option value="left">Left (center)</option>
+    <option value="right">Right (center)</option>
+    <option value="custom">Custom (click in webcam box)</option>
+  </select>
 
   <!-- Webcam box HUD -->
   <div id="clickBoxWrapper">
-    <div id="clickBoxLabel">Custom webcam box (for “Custom” mode)</div>
+    <div id="clickBoxLabel">Custom webcam box (used when position = “Custom”)</div>
     <div id="clickBox">
       <div id="clickDot"></div>
     </div>
@@ -207,9 +190,9 @@
   <script>
     const durationInput = document.getElementById("duration");
     const durationLabel = document.getElementById("durationLabel");
-
     const clickBox = document.getElementById("clickBox");
     const clickDot = document.getElementById("clickDot");
+    const positionSelect = document.getElementById("position");
 
     let customX = 0.5;
     let customY = 0.8;
@@ -221,14 +204,6 @@
 
     durationInput.addEventListener("input", updateDurationLabel);
     updateDurationLabel();
-
-    function getPositionMode() {
-      const nodes = document.querySelectorAll("input[name='posMode']");
-      for (const n of nodes) {
-        if (n.checked) return n.value;
-      }
-      return "preset";
-    }
 
     clickBox.addEventListener("click", (e) => {
       const rect = clickBox.getBoundingClientRect();
@@ -250,8 +225,7 @@
       const anim      = document.getElementById("animation").value;
       const color     = document.getElementById("color").value;
       const bar       = document.getElementById("barToggle").checked;
-      const position  = document.getElementById("position").value;
-      const posMode   = getPositionMode();
+      const position  = positionSelect.value;
       const durationMs = parseInt(durationInput.value, 10);
 
       localStorage.setItem("dramaticSubtitle", JSON.stringify({
@@ -259,8 +233,7 @@
         anim,
         color,
         bar,
-        position,
-        positionMode: posMode,
+        position,   // bottom / center / top / left / right / custom
         customX,
         customY,
         durationMs
@@ -274,7 +247,6 @@
         color: "#ffffff",
         bar: false,
         position: "bottom",
-        positionMode: "preset",
         customX,
         customY,
         durationMs: parseInt(durationInput.value, 10)

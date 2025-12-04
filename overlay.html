@@ -15,14 +15,18 @@
       position: absolute;
       width: 100%;
       display: flex;
-      justify-content: center;
       pointer-events: none;
     }
 
-    /* Preset positions */
-    .pos-bottom  { bottom: 5%; }
-    .pos-top     { top: 5%; }
-    .pos-center  { top: 50%; transform: translateY(-50%); }
+    /* Vertical positions */
+    .pos-bottom  { bottom: 5%; align-items: flex-end; }
+    .pos-top     { top: 5%;    align-items: flex-start; }
+    .pos-center  { top: 50%;   transform: translateY(-50%); align-items: center; }
+
+    /* Horizontal alignment */
+    .align-left   { justify-content: flex-start; }
+    .align-center { justify-content: center; }
+    .align-right  { justify-content: flex-end; }
 
     #subtitle {
       padding: 6px 12px;
@@ -58,7 +62,6 @@
       100% { transform: translateX(0);   }
     }
 
-    /* Pop – bigger + punchy */
     .pop { animation: pop 0.45s cubic-bezier(0.18, 0.89, 0.32, 1.28) forwards; }
     @keyframes pop {
       0%   { transform: scale(0.2); opacity: 0; }
@@ -67,7 +70,6 @@
       100% { transform: scale(1); }
     }
 
-    /* Mega pop – over the top */
     .megaPop { animation: megaPop 0.6s cubic-bezier(0.15, 1.4, 0.3, 1) forwards; }
     @keyframes megaPop {
       0%   { transform: scale(0.05) rotate(-5deg); opacity: 0; }
@@ -76,7 +78,6 @@
       100% { transform: scale(1) rotate(0deg);    }
     }
 
-    /* Explode – big blow up & fragments feeling */
     .explode { animation: explode 0.7s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
     @keyframes explode {
       0%   { transform: scale(0.7); opacity: 0; text-shadow: 0 0 0 rgba(0,0,0,0); letter-spacing: 0; }
@@ -86,7 +87,6 @@
       100% { transform: scale(2.2) translateY(-10px); opacity: 0; text-shadow: 12px -6px 0 rgba(255,255,255,0.2), -12px 6px 0 rgba(0,0,0,0.2); }
     }
 
-    /* Drop from top */
     .drop { animation: drop 0.5s cubic-bezier(0.33, 1.2, 0.68, 1) forwards; }
     @keyframes drop {
       0%   { transform: translateY(-120px) scaleY(1.2); opacity: 0; }
@@ -109,7 +109,6 @@
       100% { text-shadow: 0 0 0 red, 0 0 0 cyan; transform: translate(0,0); }
     }
 
-    /* Sinister – slow, menacing pulse */
     .sinister { animation: sinister 0.9s ease-out forwards; }
     @keyframes sinister {
       0%   { transform: scale(0.7); opacity: 0; letter-spacing: -2px; text-shadow: 0 0 0 rgba(150,0,0,0); }
@@ -118,7 +117,6 @@
       100% { transform: scale(1);   text-shadow: 0 0 8px rgba(120,0,0,0.8); }
     }
 
-    /* Red spotlight – glowing horror vibe */
     .spotlightRed { animation: spotlightRed 1s ease-out forwards; }
     @keyframes spotlightRed {
       0%   { text-shadow: 0 0 0 rgba(255,0,0,0); }
@@ -130,7 +128,7 @@
 </head>
 
 <body>
-  <div id="subtitleWrapper" class="pos-bottom">
+  <div id="subtitleWrapper" class="pos-bottom align-center">
     <div id="subtitle"></div>
   </div>
 
@@ -144,20 +142,33 @@
       "drop","fadeUp","glitch","sinister","spotlightRed"
     ];
 
-    function usePresetPosition(pos) {
-      // clear custom style
+    function resetWrapperClasses() {
+      wrapper.classList.remove("pos-top","pos-bottom","pos-center","align-left","align-center","align-right");
       wrapper.style.top = "";
       wrapper.style.left = "";
       wrapper.style.transform = "";
-      wrapper.classList.remove("pos-top","pos-bottom","pos-center");
+    }
 
-      if (pos === "top") wrapper.classList.add("pos-top");
-      else if (pos === "center") wrapper.classList.add("pos-center");
-      else wrapper.classList.add("pos-bottom");
+    function usePresetPosition(pos) {
+      resetWrapperClasses();
+
+      // vertical + horizontal
+      if (pos === "top") {
+        wrapper.classList.add("pos-top","align-center");
+      } else if (pos === "center") {
+        wrapper.classList.add("pos-center","align-center");
+      } else if (pos === "left") {
+        wrapper.classList.add("pos-center","align-left");
+      } else if (pos === "right") {
+        wrapper.classList.add("pos-center","align-right");
+      } else {
+        // bottom default
+        wrapper.classList.add("pos-bottom","align-center");
+      }
     }
 
     function useCustomPosition(x, y) {
-      wrapper.classList.remove("pos-top","pos-bottom","pos-center");
+      resetWrapperClasses();
       wrapper.style.top = (y * 100) + "%";
       wrapper.style.left = (x * 100) + "%";
       wrapper.style.transform = "translate(-50%, -50%)";
@@ -170,23 +181,22 @@
       lastPayload = raw;
       const data = JSON.parse(raw);
 
-      const text         = data.text || "";
-      const anim         = data.anim || "zoomIn";
-      const color        = data.color || "#ffffff";
-      const bar          = !!data.bar;
-      const posMode      = data.positionMode || "preset";
-      const presetPos    = data.position || "bottom";
-      const customX      = typeof data.customX === "number" ? data.customX : 0.5;
-      const customY      = typeof data.customY === "number" ? data.customY : 0.8;
-      const durationMs   = data.durationMs || 450;
+      const text       = data.text || "";
+      const anim       = data.anim || "zoomIn";
+      const color      = data.color || "#ffffff";
+      const bar        = !!data.bar;
+      const position   = data.position || "bottom"; // bottom / center / top / left / right / custom
+      const customX    = typeof data.customX === "number" ? data.customX : 0.5;
+      const customY    = typeof data.customY === "number" ? data.customY : 0.8;
+      const durationMs = data.durationMs || 450;
 
       subtitle.textContent = text;
       subtitle.style.color = color;
 
-      if (posMode === "custom") {
+      if (position === "custom") {
         useCustomPosition(customX, customY);
       } else {
-        usePresetPosition(presetPos);
+        usePresetPosition(position);
       }
 
       subtitle.classList.remove(...ANIM_CLASSES);
