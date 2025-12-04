@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>apolloTitleTwin Controller</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      padding: 20px;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      margin-bottom: 10px;
+    }
+
+    label {
+      font-weight: 600;
+      margin-top: 15px;
+      display: block;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      font-size: 18px;
+      padding: 10px;
+      margin-top: 8px;
+      box-sizing: border-box;
+    }
+
+    button {
+      margin-top: 15px;
+      padding: 10px;
+      font-size: 18px;
+      width: 49%;
+      cursor: pointer;
+    }
+
+    .row {
+      display: flex;
+      gap: 2%;
+    }
+  </style>
+</head>
+<body>
+  <h1>apolloTitleTwin Controller</h1>
+  <p>Type dramatic text and fire it to your overlay.</p>
+
+  <label for="textInput">Subtitle text</label>
+  <textarea id="textInput" rows="2" placeholder="BRO WHAT DID I JUST SEE"></textarea>
+
+  <label for="animation">Animation</label>
+  <select id="animation">
+    <option value="zoomIn">Zoom In (dramatic)</option>
+    <option value="shake">Shake (intense)</option>
+  </select>
+
+  <div class="row">
+    <button onclick="send()">Send</button>
+    <button onclick="clearText()">Clear</button>
+  </div>
+
+  <script>
+    function send() {
+      const text = document.getElementById("textInput").value.trim();
+      const anim = document.getElementById("animation").value;
+
+      localStorage.setItem("dramaticSubtitle", JSON.stringify({ text, anim }));
+    }
+
+    function clearText() {
+      localStorage.setItem("dramaticSubtitle", JSON.stringify({ text: "", anim: "" }));
+      document.getElementById("textInput").value = "";
+    }
+  </script>
+</body>
+</html>
