@@ -5,10 +5,26 @@
   <title>Dramatic Subtitle Overlay</title>
 
   <style>
-    body {
+    /* Full-window green background for chroma key */
+    html, body {
       margin: 0;
-      background: transparent;
+      padding: 0;
+      width: 100vw;
+      height: 100vh;
       overflow: hidden;
+      background: #00ff00; /* chroma green */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    /* Fixed 1920x1080 overlay canvas that scales to fit */
+    #overlayCanvas {
+      position: relative;
+      width: 1920px;   /* internal resolution */
+      height: 1080px;
+      transform-origin: top left;
+      transform: scale(calc(min(100vw / 1920, 100vh / 1080)));
     }
 
     #subtitleWrapper {
@@ -128,8 +144,10 @@
 </head>
 
 <body>
-  <div id="subtitleWrapper" class="pos-bottom align-center">
-    <div id="subtitle"></div>
+  <div id="overlayCanvas">
+    <div id="subtitleWrapper" class="pos-bottom align-center">
+      <div id="subtitle"></div>
+    </div>
   </div>
 
   <script>
