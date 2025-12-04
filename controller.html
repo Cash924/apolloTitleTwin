@@ -7,7 +7,7 @@
     body {
       font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
       padding: 20px;
-      max-width: 600px;
+      max-width: 650px;
       margin: 0 auto;
     }
 
@@ -53,6 +53,72 @@
       width: auto;
       flex: 0 0 auto;
     }
+
+    /* Duration slider */
+    #durationRow {
+      margin-top: 8px;
+    }
+
+    #durationMarks {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: #777;
+      margin-top: 2px;
+    }
+
+    /* Webcam box HUD */
+    #posModeRow {
+      margin-top: 10px;
+      font-size: 14px;
+    }
+
+    #clickBoxWrapper {
+      margin-top: 8px;
+    }
+
+    #clickBoxLabel {
+      font-size: 13px;
+      color: #777;
+      margin-bottom: 4px;
+    }
+
+    #clickBox {
+      width: 260px;
+      height: 160px;
+      border: 2px solid #555;
+      background: #111;
+      position: relative;
+      cursor: crosshair;
+      border-radius: 6px;
+      overflow: hidden;
+    }
+
+    #clickBox::before {
+      content: "webcam";
+      position: absolute;
+      bottom: 4px;
+      right: 6px;
+      font-size: 11px;
+      color: #888;
+    }
+
+    #clickDot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #ff4d4d;
+      position: absolute;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      box-shadow: 0 0 8px rgba(255,77,77,0.9);
+    }
+
+    #customHint {
+      font-size: 11px;
+      color: #888;
+      margin-top: 3px;
+    }
   </style>
 </head>
 <body>
@@ -74,15 +140,6 @@
 
   <div class="row">
     <div>
-      <label for="position">Position</label>
-      <select id="position">
-        <option value="bottom">Bottom</option>
-        <option value="top">Top</option>
-        <option value="center">Center</option>
-      </select>
-    </div>
-
-    <div>
       <label>Text color</label>
       <input id="color" class="color-input" type="color" value="#ffffff">
     </div>
@@ -94,25 +151,119 @@
     </div>
   </div>
 
+  <!-- Duration control -->
+  <label for="duration">Animation duration</label>
+  <div id="durationRow">
+    <input id="duration" type="range" min="200" max="1500" step="50" value="450">
+    <div id="durationMarks">
+      <span>Fast</span>
+      <span>Normal</span>
+      <span>Slow</span>
+    </div>
+    <div style="font-size:12px;color:#666;margin-top:2px;">
+      Current: <span id="durationLabel">0.45s</span>
+    </div>
+  </div>
+
+  <!-- Position mode -->
+  <div id="posModeRow">
+    <strong>Position mode</strong><br>
+    <label>
+      <input type="radio" name="posMode" value="preset" checked>
+      Simple (bottom / center)
+    </label>
+    <label>
+      <input type="radio" name="posMode" value="custom">
+      Custom (click in webcam box)
+    </label>
+  </div>
+
+  <!-- Preset position -->
+  <div id="presetRow">
+    <label for="position">Preset position</label>
+    <select id="position">
+      <option value="bottom">Bottom</option>
+      <option value="center">Center</option>
+    </select>
+  </div>
+
+  <!-- Webcam box HUD -->
+  <div id="clickBoxWrapper">
+    <div id="clickBoxLabel">Custom webcam box (for “Custom” mode)</div>
+    <div id="clickBox">
+      <div id="clickDot"></div>
+    </div>
+    <div id="customHint">Click where you want the subtitles to appear relative to your webcam.</div>
+  </div>
+
   <div class="row">
     <button onclick="send()">Send</button>
     <button onclick="clearText()">Clear</button>
   </div>
 
   <script>
+    const durationInput = document.getElementById("duration");
+    const durationLabel = document.getElementById("durationLabel");
+
+    const clickBox = document.getElementById("clickBox");
+    const clickDot = document.getElementById("clickDot");
+
+    let customX = 0.5;
+    let customY = 0.8;
+
+    function updateDurationLabel() {
+      const ms = parseInt(durationInput.value, 10);
+      durationLabel.textContent = (ms / 1000).toFixed(2) + "s";
+    }
+
+    durationInput.addEventListener("input", updateDurationLabel);
+    updateDurationLabel();
+
+    // position mode helper
+    function getPositionMode() {
+      const nodes = document.querySelectorAll("input[name='posMode']");
+      for (const n of nodes) {
+        if (n.checked) return n.value;
+      }
+      return "preset";
+    }
+
+    // webcam box click
+    clickBox.addEventListener("click", (e) => {
+      const rect = clickBox.getBoundingClientRect();
+      const x = (e.clientX - rect.left) / rect.width;
+      const y = (e.clientY - rect.top) / rect.height;
+
+      customX = Math.min(Math.max(x, 0), 1);
+      customY = Math.min(Math.max(y, 0), 1);
+
+      clickDot.style.left = (customX * 100) + "%";
+      clickDot.style.top  = (customY * 100) + "%";
+    });
+
+    // initial dot pos
+    clickDot.style.left = (customX * 100) + "%";
+    clickDot.style.top  = (customY * 100) + "%";
+
     function send() {
-      const text = document.getElementById("textInput").value.trim();
-      const anim = document.getElementById("animation").value;
-      const position = document.getElementById("position").value;
-      const color = document.getElementById("color").value;
-      const bar = document.getElementById("barToggle").checked;
+      const text      = document.getElementById("textInput").value.trim();
+      const anim      = document.getElementById("animation").value;
+      const color     = document.getElementById("color").value;
+      const bar       = document.getElementById("barToggle").checked;
+      const position  = document.getElementById("position").value;
+      const posMode   = getPositionMode();
+      const durationMs = parseInt(durationInput.value, 10);
 
       localStorage.setItem("dramaticSubtitle", JSON.stringify({
         text,
         anim,
-        position,
         color,
-        bar
+        bar,
+        position,
+        positionMode: posMode,
+        customX,
+        customY,
+        durationMs
       }));
     }
 
@@ -120,9 +271,13 @@
       localStorage.setItem("dramaticSubtitle", JSON.stringify({
         text: "",
         anim: "",
-        position: "bottom",
         color: "#ffffff",
-        bar: false
+        bar: false,
+        position: "bottom",
+        positionMode: "preset",
+        customX,
+        customY,
+        durationMs: parseInt(durationInput.value, 10)
       }));
       document.getElementById("textInput").value = "";
     }
