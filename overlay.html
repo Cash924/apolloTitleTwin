@@ -11,11 +11,21 @@
       overflow: hidden;
     }
 
-    #subtitle {
+    #subtitleWrapper {
       position: absolute;
-      bottom: 5%;
       width: 100%;
-      text-align: center;
+      display: flex;
+      justify-content: center;
+      pointer-events: none;
+    }
+
+    /* Positions */
+    .pos-bottom  { bottom: 5%; }
+    .pos-top     { top: 5%; }
+    .pos-center  { top: 50%; transform: translateY(-50%); }
+
+    #subtitle {
+      padding: 6px 12px;
       font-size: 48px;
       font-weight: 900;
       font-family: Impact, system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
@@ -23,8 +33,15 @@
       -webkit-text-stroke: 3px black;
       opacity: 0;
       transition: opacity 0.2s ease;
+      border-radius: 6px;
     }
 
+    /* Black bar background toggle */
+    .bar-on {
+      background: rgba(0,0,0,0.7);
+    }
+
+    /* Animations */
     .zoomIn {
       animation: zoomIn 0.4s ease forwards;
     }
@@ -50,11 +67,25 @@
 </head>
 
 <body>
-  <div id="subtitle"></div>
+  <div id="subtitleWrapper" class="pos-bottom">
+    <div id="subtitle"></div>
+  </div>
 
   <script>
+    const wrapper = document.getElementById("subtitleWrapper");
     const subtitle = document.getElementById("subtitle");
     let lastPayload = "";
+
+    function applyPosition(pos) {
+      wrapper.classList.remove("pos-top", "pos-bottom", "pos-center");
+      if (pos === "top") wrapper.classList.add("pos-top");
+      else if (pos === "center") wrapper.classList.add("pos-center");
+      else wrapper.classList.add("pos-bottom");
+    }
+
+    function applyBar(on) {
+      subtitle.classList.toggle("bar-on", !!on);
+    }
 
     function updateSubtitle() {
       const raw = localStorage.getItem("dramaticSubtitle");
@@ -63,16 +94,28 @@
       lastPayload = raw;
       const data = JSON.parse(raw);
 
-      subtitle.className = "";
-      subtitle.textContent = data.text || "";
+      subtitle.className = subtitle.className.replace(/\bzoomIn\b|\bshake\b/g, "").trim();
+      wrapper.style.transform = ""; // reset if center
 
-      if (!data.text) {
+      const text = data.text || "";
+      const anim = data.anim || "zoomIn";
+      const color = data.color || "#ffffff";
+      const pos = data.position || "bottom";
+      const bar = data.bar;
+
+      subtitle.textContent = text;
+      subtitle.style.color = color;
+
+      applyPosition(pos);
+      applyBar(bar);
+
+      if (!text) {
         subtitle.style.opacity = 0;
         return;
       }
 
       subtitle.style.opacity = 1;
-      subtitle.classList.add(data.anim || "zoomIn");
+      subtitle.classList.add(anim);
     }
 
     setInterval(updateSubtitle, 100);
