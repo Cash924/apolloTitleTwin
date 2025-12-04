@@ -54,7 +54,6 @@
       flex: 0 0 auto;
     }
 
-    /* Duration slider */
     #durationRow {
       margin-top: 8px;
     }
@@ -67,7 +66,6 @@
       margin-top: 2px;
     }
 
-    /* Webcam box HUD */
     #posModeRow {
       margin-top: 10px;
       font-size: 14px;
@@ -133,9 +131,13 @@
     <option value="zoomIn">Zoom In (dramatic)</option>
     <option value="shake">Shake (intense)</option>
     <option value="pop">Pop (blow up)</option>
+    <option value="megaPop">Mega Pop (overkill)</option>
+    <option value="explode">Explode into pieces</option>
     <option value="drop">Drop from top</option>
     <option value="fadeUp">Fade up</option>
     <option value="glitch">Glitch</option>
+    <option value="sinister">Sinister pulse</option>
+    <option value="spotlightRed">Red spotlight</option>
   </select>
 
   <div class="row">
@@ -170,7 +172,7 @@
     <strong>Position mode</strong><br>
     <label>
       <input type="radio" name="posMode" value="preset" checked>
-      Simple (bottom / center)
+      Simple (top / center / bottom)
     </label>
     <label>
       <input type="radio" name="posMode" value="custom">
@@ -184,6 +186,7 @@
     <select id="position">
       <option value="bottom">Bottom</option>
       <option value="center">Center</option>
+      <option value="top">Top</option>
     </select>
   </div>
 
@@ -219,7 +222,6 @@
     durationInput.addEventListener("input", updateDurationLabel);
     updateDurationLabel();
 
-    // position mode helper
     function getPositionMode() {
       const nodes = document.querySelectorAll("input[name='posMode']");
       for (const n of nodes) {
@@ -228,7 +230,6 @@
       return "preset";
     }
 
-    // webcam box click
     clickBox.addEventListener("click", (e) => {
       const rect = clickBox.getBoundingClientRect();
       const x = (e.clientX - rect.left) / rect.width;
@@ -241,7 +242,6 @@
       clickDot.style.top  = (customY * 100) + "%";
     });
 
-    // initial dot pos
     clickDot.style.left = (customX * 100) + "%";
     clickDot.style.top  = (customY * 100) + "%";
 
