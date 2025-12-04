@@ -41,27 +41,76 @@
       background: rgba(0,0,0,0.7);
     }
 
-    /* Animations */
+    /* --- ANIMATIONS --- */
+
+    /* Basic zoom */
     .zoomIn {
       animation: zoomIn 0.4s ease forwards;
     }
 
     @keyframes zoomIn {
-      0% { transform: scale(0.3); opacity: 0; }
-      100% { transform: scale(1); opacity: 1; }
+      0%   { transform: scale(0.3); opacity: 0; }
+      100% { transform: scale(1);   opacity: 1; }
     }
 
+    /* Shake / quake */
     .shake {
       animation: shake 0.4s ease-in-out forwards;
     }
 
     @keyframes shake {
-      0% { transform: translateX(0); }
-      20% { transform: translateX(-10px); }
-      40% { transform: translateX(10px); }
-      60% { transform: translateX(-10px); }
-      80% { transform: translateX(10px); }
-      100% { transform: translateX(0); }
+      0%   { transform: translateX(0);   }
+      20%  { transform: translateX(-10px); }
+      40%  { transform: translateX(10px); }
+      60%  { transform: translateX(-10px); }
+      80%  { transform: translateX(10px);  }
+      100% { transform: translateX(0);   }
+    }
+
+    /* POP – blow up then settle */
+    .pop {
+      animation: pop 0.45s cubic-bezier(0.18, 0.89, 0.32, 1.28) forwards;
+    }
+
+    @keyframes pop {
+      0%   { transform: scale(0.2); opacity: 0; }
+      40%  { transform: scale(1.3); opacity: 1; }
+      65%  { transform: scale(0.9); }
+      100% { transform: scale(1); }
+    }
+
+    /* Drop from top and squash */
+    .drop {
+      animation: drop 0.5s cubic-bezier(0.33, 1.2, 0.68, 1) forwards;
+    }
+
+    @keyframes drop {
+      0%   { transform: translateY(-120px) scaleY(1.2); opacity: 0; }
+      70%  { transform: translateY(0)      scaleY(0.8); opacity: 1; }
+      100% { transform: translateY(0)      scaleY(1); }
+    }
+
+    /* Fade up (good for softer lines) */
+    .fadeUp {
+      animation: fadeUp 0.45s ease-out forwards;
+    }
+
+    @keyframes fadeUp {
+      0%   { transform: translateY(20px); opacity: 0; }
+      100% { transform: translateY(0);    opacity: 1; }
+    }
+
+    /* Glitchy effect */
+    .glitch {
+      animation: glitch 0.35s steps(6, end) forwards;
+    }
+
+    @keyframes glitch {
+      0%   { text-shadow: -2px 0 red, 2px 0 cyan; transform: translate(0,0); opacity: 1; }
+      25%  { text-shadow: 2px 0 red, -2px 0 cyan; transform: translate(-2px, 1px); }
+      50%  { text-shadow: -3px 0 red, 3px 0 cyan; transform: translate(2px, -1px); }
+      75%  { text-shadow: 3px 0 red, -3px 0 cyan; transform: translate(-1px, 2px); }
+      100% { text-shadow: 0 0 0 red, 0 0 0 cyan; transform: translate(0,0); }
     }
   </style>
 </head>
@@ -83,10 +132,6 @@
       else wrapper.classList.add("pos-bottom");
     }
 
-    function applyBar(on) {
-      subtitle.classList.toggle("bar-on", !!on);
-    }
-
     function updateSubtitle() {
       const raw = localStorage.getItem("dramaticSubtitle");
       if (!raw || raw === lastPayload) return;
@@ -94,28 +139,29 @@
       lastPayload = raw;
       const data = JSON.parse(raw);
 
-      subtitle.className = subtitle.className.replace(/\bzoomIn\b|\bshake\b/g, "").trim();
-      wrapper.style.transform = ""; // reset if center
-
       const text = data.text || "";
       const anim = data.anim || "zoomIn";
       const color = data.color || "#ffffff";
       const pos = data.position || "bottom";
-      const bar = data.bar;
+      const bar = !!data.bar;
 
       subtitle.textContent = text;
       subtitle.style.color = color;
-
       applyPosition(pos);
-      applyBar(bar);
+
+      // base classes (bar + animation)
+      const classes = [];
+      if (bar) classes.push("bar-on");
+      if (anim) classes.push(anim);
+      subtitle.className = classes.join(" ");
 
       if (!text) {
         subtitle.style.opacity = 0;
+        subtitle.className = bar ? "bar-on" : "";
         return;
       }
 
       subtitle.style.opacity = 1;
-      subtitle.classList.add(anim);
     }
 
     setInterval(updateSubtitle, 100);
