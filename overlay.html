@@ -46,7 +46,7 @@
 
     #subtitle {
       padding: 6px 12px;
-      font-size: 48px;
+      font-size: 48px; /* default, can be overridden by controller */
       font-weight: 900;
       font-family: Impact, system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
       color: white;
@@ -207,9 +207,11 @@
       const customX    = typeof data.customX === "number" ? data.customX : 0.5;
       const customY    = typeof data.customY === "number" ? data.customY : 0.8;
       const durationMs = data.durationMs || 450;
+      const fontSize   = data.fontSize || 48;
 
       subtitle.textContent = text;
       subtitle.style.color = color;
+      subtitle.style.fontSize = fontSize + "px";
 
       if (position === "custom") {
         useCustomPosition(customX, customY);
